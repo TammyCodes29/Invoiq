@@ -138,3 +138,22 @@ export async function getClients() {
     },
   })
 }
+
+export async function getClientById(clientId: string) {
+  const user = await getCurrentUser()
+
+  const client = await prisma.client.findUnique({
+    where: { id: clientId },
+    include: {
+      invoices: {
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  })
+
+  if (!client || client.userId !== user.id) {
+    return null
+  }
+
+  return client
+}
