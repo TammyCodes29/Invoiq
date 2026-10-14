@@ -9,6 +9,10 @@ import Link from "next/link"
 import { InvoiceActions } from "@/components/dashboard/invoices/InvoiceActions"
 import { PayInvoiceButton } from "@/components/dashboard/invoices/PayInvoiceButton"
 
+
+export const dynamic = 'force-dynamic'
+
+
 type InvoiceDetailPageProps = {
   params: Promise<{ id: string }>
 }

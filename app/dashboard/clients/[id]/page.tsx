@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Mail, Phone, Building2, MapPin, Plus } from "lucide-react"
 import Link from "next/link"
 
+
+export const dynamic = 'force-dynamic'
 type ClientDetailPageProps = {
   params: Promise<{ id: string }>
 }
