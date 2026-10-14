@@ -169,3 +169,50 @@ export async function generateInvoiceNumber(userId: string) {
   const number = count + 1
   return `INV-${String(number).padStart(3, "0")}`
 }
+
+export async function getDashboardStats() {
+  const user = await getCurrentUser()
+
+  const [totalClients, invoices] = await Promise.all([
+    prisma.client.count({
+      where: { userId: user.id },
+    }),
+    prisma.invoice.findMany({
+      where: { userId: user.id },
+      include: {
+        client: {
+          select: { name: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+  ])
+
+  // Group revenue by currency (only PAID invoices)
+  const revenueMap: Record<string, number> = {}
+  invoices
+    .filter((inv) => inv.status === "PAID")
+    .forEach((inv) => {
+      const currency = inv.currency
+      revenueMap[currency] = (revenueMap[currency] ?? 0) + Number(inv.total)
+    })
+
+  // Group outstanding by currency (SENT + OVERDUE invoices)
+  const outstandingMap: Record<string, number> = {}
+  invoices
+    .filter((inv) => inv.status === "SENT" || inv.status === "OVERDUE")
+    .forEach((inv) => {
+      const currency = inv.currency
+      outstandingMap[currency] =
+        (outstandingMap[currency] ?? 0) + Number(inv.total)
+    })
+
+  const recentInvoices = invoices.slice(0, 5)
+
+  return {
+    totalClients,
+    revenueMap,
+    outstandingMap,
+    recentInvoices,
+  }
+}

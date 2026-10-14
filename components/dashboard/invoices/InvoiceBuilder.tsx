@@ -18,7 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2, Sparkles} from "lucide-react"
+import { generateLineItems } from "@/actions/ai"
 
 const lineItemSchema = z.object({
   description: z.string().min(1, "Description is required"),
@@ -75,6 +76,8 @@ export function InvoiceBuilder({
 }: InvoiceBuilderProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [aiPrompt, setAiPrompt] = useState("")
+  const [isGenerating, setIsGenerating] = useState(false)
 
 
   const {
@@ -95,7 +98,7 @@ export function InvoiceBuilder({
 },
   })
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "lineItems",
   })
@@ -104,11 +107,12 @@ export function InvoiceBuilder({
   const watchedTax = useWatch({ control, name: "tax" })
   const watchedCurrency = useWatch({ control, name: "currency" })
 
-  const subtotal = watchedLineItems?.reduce(
-    (sum, item) => sum + (item.quantity || 0) * (item.unitPrice || 0),
-    0
-  ) ?? 0
+  const safeLineItems = Array.isArray(watchedLineItems) ? watchedLineItems : []
 
+  const subtotal = safeLineItems.reduce(
+    (sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0),
+    0
+  )
   const taxAmount = (subtotal * (watchedTax || 0)) / 100
   const total = subtotal + taxAmount
   const currencySymbol = CURRENCY_SYMBOLS[watchedCurrency] ?? "₦"
@@ -117,6 +121,27 @@ export function InvoiceBuilder({
     return `${currencySymbol}${amount.toLocaleString()}`
   }
 
+  async function handleAIGenerate() {
+  if (!aiPrompt.trim()) return
+  
+  setIsGenerating(true)
+  const result = await generateLineItems(aiPrompt, 50000) // 50000 is a dummy default rate
+  
+  // Check if we got a valid array back
+    if (result.success && Array.isArray(result.lineItems) && result.lineItems.length > 0) {
+      
+      // THIS IS THE MAGIC FIX:
+      // replace() updates BOTH the form data AND the UI fields array
+      replace(result.lineItems) 
+      
+      setAiPrompt("") // Clear the prompt
+    } else {
+      alert("AI could not generate valid line items. Please try a different description.")
+    }
+    
+    setIsGenerating(false)
+  }
+  
   async function onSubmit(data: FormData) {
     setIsSubmitting(true)
 
@@ -240,6 +265,36 @@ export function InvoiceBuilder({
       </Card>
 
       {/* Line Items */}
+            {/* AI Assistant Panel */}
+      <Card className="border-blue-500/20 bg-blue-500/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-white">
+            <Sparkles className="size-5 text-blue-400" />
+            AI Line Item Drafter
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-zinc-400">
+            Describe the work you did in plain English. The AI will break it down into professional line items.
+          </p>
+          <div className="flex gap-2">
+            <textarea
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              placeholder="e.g. Built a landing page for Acme Corp, took about 10 hours, and also set up their email hosting."
+              className="flex-1 min-h-15 rounded-md border border-zinc-700 bg-zinc-800 p-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <Button
+              type="button"
+              onClick={handleAIGenerate}
+              disabled={isGenerating || !aiPrompt.trim()}
+              className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
+            >
+              {isGenerating ? "Generating..." : "Generate"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
       <Card className="border-zinc-800 bg-zinc-900/60">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-white">Line Items</CardTitle>
