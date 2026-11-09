@@ -8,6 +8,35 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Mail, Phone, Building2, MapPin, Plus } from "lucide-react"
 import Link from "next/link"
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  NGN: "₦",
+  USD: "$",
+  GBP: "£",
+}
+
+const STATUS_STYLES: Record<string, string> = {
+  DRAFT: "bg-[#f0f1ed] text-[#6e7971]",
+  SENT: "bg-[#edf2fa] text-[#3863a0]",
+  PAID: "bg-[#eaf2ed] text-[#28644d]",
+  OVERDUE: "bg-[#fbefea] text-[#aa503d]",
+  CANCELLED: "bg-[#f0f1ed] text-[#6e7971]",
+}
+
+function sumByCurrency(invoices: { currency: string; total: unknown }[]) {
+  return invoices.reduce<Record<string, number>>((totals, invoice) => {
+    totals[invoice.currency] = (totals[invoice.currency] ?? 0) + Number(invoice.total)
+    return totals
+  }, {})
+}
+
+function formatCurrencyMap(totals: Record<string, number>) {
+  const entries = Object.entries(totals)
+  if (entries.length === 0) return "₦0"
+  return entries
+    .map(([currency, amount]) => `${CURRENCY_SYMBOLS[currency] ?? `${currency} `}${amount.toLocaleString("en-US", { maximumFractionDigits: 2 })}`)
+    .join(" · ")
+}
+
 
 export const dynamic = 'force-dynamic'
 type ClientDetailPageProps = {
@@ -26,83 +55,80 @@ export default async function ClientDetailPage({
 
   if (!client) notFound()
 
-  const totalInvoiced = client.invoices.reduce(
-    (sum, invoice) => sum + Number(invoice.total),
-    0
+  const totalInvoiced = sumByCurrency(
+    client.invoices.filter((invoice) => invoice.status !== "CANCELLED")
   )
-
-  const paidInvoices = client.invoices.filter(
-    (invoice) => invoice.status === "PAID"
+  const totalPaid = sumByCurrency(
+    client.invoices.filter((invoice) => invoice.status === "PAID")
   )
-
-  const totalPaid = paidInvoices.reduce(
-    (sum, invoice) => sum + Number(invoice.total),
-    0
+  const outstanding = sumByCurrency(
+    client.invoices.filter(
+      (invoice) => invoice.status === "SENT" || invoice.status === "OVERDUE"
+    )
   )
-
-  const outstanding = totalInvoiced - totalPaid
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-7">
 
       {/* Back button and header */}
       <div>
         <Link href="/dashboard/clients">
           <Button
             variant="ghost"
-            className="mb-4 gap-2 text-zinc-400 hover:text-white"
+              className="mb-4 gap-2 text-[#718078] hover:bg-[#edf1ea] hover:text-[#1b483d]"
           >
             <ArrowLeft className="size-4" />
             Back to Clients
           </Button>
         </Link>
 
-        <h1 className="text-3xl font-bold tracking-tight text-white">
+        <p className="mb-2 text-[11px] font-semibold uppercase text-[#738278]">Client profile</p>
+        <h1 className="font-serif text-[34px] font-normal leading-tight text-[#1b3029]">
           {client.name}
         </h1>
 
         {client.company && (
-          <p className="mt-1 text-zinc-400">{client.company}</p>
+          <p className="mt-2 text-sm text-[#718078]">{client.company}</p>
         )}
       </div>
 
       {/* Stats cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="border-zinc-800 bg-zinc-900/60">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Card className="border-[#e1e7de] bg-[#fffefa] shadow-[0_1px_2px_rgba(27,47,41,0.03)]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-400">
+            <CardTitle className="text-sm font-medium text-[#68776d]">
               Total Invoiced
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-white">
-              ₦{totalInvoiced.toLocaleString()}
+            <p className="break-words text-xl font-semibold text-[#20372e] sm:text-2xl">
+              {formatCurrencyMap(totalInvoiced)}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-800 bg-zinc-900/60">
+        <Card className="border-[#e1e7de] bg-[#fffefa] shadow-[0_1px_2px_rgba(27,47,41,0.03)]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-400">
+            <CardTitle className="text-sm font-medium text-[#68776d]">
               Total Paid
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-400">
-              ₦{totalPaid.toLocaleString()}
+            <p className="break-words text-xl font-semibold text-[#176c53] sm:text-2xl">
+              {formatCurrencyMap(totalPaid)}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-800 bg-zinc-900/60">
+        <Card className="border-[#e1e7de] bg-[#fffefa] shadow-[0_1px_2px_rgba(27,47,41,0.03)]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-400">
+            <CardTitle className="text-sm font-medium text-[#68776d]">
               Outstanding
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-red-400">
-              ₦{outstanding.toLocaleString()}
+            <p className="break-words text-xl font-semibold text-[#aa503d] sm:text-2xl">
+              {formatCurrencyMap(outstanding)}
             </p>
           </CardContent>
         </Card>
@@ -111,35 +137,35 @@ export default async function ClientDetailPage({
       <div className="grid gap-6 lg:grid-cols-3">
 
         {/* Contact info */}
-        <Card className="border-zinc-800 bg-zinc-900/60">
+        <Card className="border-[#e1e7de] bg-[#fffefa] shadow-[0_1px_2px_rgba(27,47,41,0.03)]">
           <CardHeader>
-            <CardTitle className="text-white">Contact Details</CardTitle>
+            <CardTitle className="text-base font-semibold text-[#233a30]">Contact details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
 
-            <div className="flex items-center gap-3 text-sm">
-              <Mail className="size-4 shrink-0 text-zinc-400" />
-              <span className="text-zinc-300">{client.email}</span>
+            <div className="flex items-start gap-3 text-sm">
+              <Mail className="mt-0.5 size-4 shrink-0 text-[#738278]" />
+              <span className="break-all text-[#42584d]">{client.email}</span>
             </div>
 
             {client.phone && (
               <div className="flex items-center gap-3 text-sm">
-                <Phone className="size-4 shrink-0 text-zinc-400" />
-                <span className="text-zinc-300">{client.phone}</span>
+                <Phone className="mt-0.5 size-4 shrink-0 text-[#738278]" />
+                <span className="text-[#42584d]">{client.phone}</span>
               </div>
             )}
 
             {client.company && (
               <div className="flex items-center gap-3 text-sm">
-                <Building2 className="size-4 shrink-0 text-zinc-400" />
-                <span className="text-zinc-300">{client.company}</span>
+                <Building2 className="mt-0.5 size-4 shrink-0 text-[#738278]" />
+                <span className="text-[#42584d]">{client.company}</span>
               </div>
             )}
 
             {client.address && (
               <div className="flex items-center gap-3 text-sm">
-                <MapPin className="size-4 shrink-0 text-zinc-400" />
-                <span className="text-zinc-300">{client.address}</span>
+                <MapPin className="mt-0.5 size-4 shrink-0 text-[#738278]" />
+                <span className="text-[#42584d]">{client.address}</span>
               </div>
             )}
 
@@ -148,9 +174,9 @@ export default async function ClientDetailPage({
 
         {/* Invoices list */}
         <div className="lg:col-span-2">
-          <Card className="border-zinc-800 bg-zinc-900/60">
+          <Card className="border-[#e1e7de] bg-[#fffefa] shadow-[0_1px_2px_rgba(27,47,41,0.03)]">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-white">Invoices</CardTitle>
+              <CardTitle className="text-base font-semibold text-[#233a30]">Invoices</CardTitle>
              <Link href={`/dashboard/invoices/new?clientId=${client.id}`}>
               <Button size="sm" className="gap-2">
                 <Plus className="size-4" />
@@ -162,31 +188,31 @@ export default async function ClientDetailPage({
             <CardContent>
               {client.invoices.length === 0 ? (
                 <div className="py-10 text-center">
-                  <p className="text-zinc-400">No invoices yet</p>
-                  <p className="mt-1 text-sm text-zinc-500">
+                  <p className="text-sm font-medium text-[#42584d]">No invoices yet</p>
+                  <p className="mt-1 text-sm text-[#89948c]">
                     Create the first invoice for this client
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="-mx-6 divide-y divide-[#edf0eb]">
                   {client.invoices.map((invoice) => (
                     <Link
                       key={invoice.id}
                       href={`/dashboard/invoices/${invoice.id}`}
-                      className="flex items-center justify-between rounded-lg border border-zinc-800 p-4 hover:bg-zinc-800/50 transition-colors"
+                      className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 transition-colors hover:bg-[#f8faf6]"
                     >
                       <div>
-                        <p className="font-medium text-white">
+                        <p className="font-medium text-[#263d33]">
                           {invoice.invoiceNumber}
                         </p>
-                        <p className="text-sm text-zinc-400">
+                        <p className="text-sm text-[#89948c]">
                           Due {new Date(invoice.dueDate).toLocaleDateString()}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-4">
-                        <p className="font-medium text-white">
-                          ₦{Number(invoice.total).toLocaleString()}
+                      <div className="flex items-center gap-3">
+                        <p className="font-medium text-[#263d33]">
+                          {CURRENCY_SYMBOLS[invoice.currency] ?? `${invoice.currency} `}{Number(invoice.total).toLocaleString("en-US", { maximumFractionDigits: 2 })}
                         </p>
                         <StatusBadge status={invoice.status} />
                       </div>
@@ -204,17 +230,9 @@ export default async function ClientDetailPage({
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    DRAFT: "bg-zinc-700 text-zinc-300",
-    SENT: "bg-blue-500/20 text-blue-400",
-    PAID: "bg-green-500/20 text-green-400",
-    OVERDUE: "bg-red-500/20 text-red-400",
-    CANCELLED: "bg-zinc-700 text-zinc-500",
-  }
-
   return (
-    <Badge className={styles[status] ?? styles.DRAFT}>
-      {status}
+    <Badge className={`border-0 ${STATUS_STYLES[status] ?? STATUS_STYLES.DRAFT}`}>
+      {status.charAt(0) + status.slice(1).toLowerCase()}
     </Badge>
   )
 }

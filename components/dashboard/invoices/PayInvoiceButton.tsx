@@ -77,7 +77,7 @@ export function PayInvoiceButton({
     <Button
       onClick={handlePayment}
       disabled={isProcessing}
-      className="gap-2 bg-green-600 hover:bg-green-700 text-white"
+      className="gap-2 bg-[#176c53] text-white hover:bg-[#125b46]"
     >
       <CreditCard className="size-4" />
       {isProcessing ? "Processing..." : "Pay Now"}

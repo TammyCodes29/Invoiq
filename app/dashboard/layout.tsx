@@ -51,11 +51,11 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="flex min-h-screen flex-col bg-[#f3f5ef] text-[#1b2f29] md:flex-row">
       <Sidebar />
 
       <main className="min-w-0 flex-1">
-        <div className="mx-auto w-full max-w-7xl p-5 md:p-8">
+        <div className="mx-auto w-full max-w-[1320px] p-4 sm:px-6 sm:py-8 lg:px-10">
           {children}
         </div>
       </main>

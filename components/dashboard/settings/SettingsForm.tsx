@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Building2, CheckCircle2, Landmark } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -62,33 +63,41 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       
       {/* Business Details */}
-      <Card className="border-zinc-800 bg-zinc-900/60">
+      <Card className="border-[#e1e7de] bg-[#fffefa] shadow-[0_1px_2px_rgba(27,47,41,0.03)]">
         <CardHeader>
-          <CardTitle className="text-white">Business Details</CardTitle>
+          <div className="flex items-start gap-3">
+            <span className="flex size-9 items-center justify-center rounded-lg bg-[#edf2fa] text-[#3863a0]">
+              <Building2 className="size-[18px]" />
+            </span>
+            <div>
+              <CardTitle className="text-base font-semibold text-[#233a30]">Business details</CardTitle>
+              <p className="mt-1 text-xs text-[#89948c]">These details appear on invoices you send.</p>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label className="text-zinc-300">Business Name</Label>
-            <Input {...register("businessName")} className="border-zinc-700 bg-zinc-800 text-white" />
+            <Label className="text-[#57675c]">Business name</Label>
+            <Input {...register("businessName")} className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]" />
           </div>
           <div className="space-y-2">
-            <Label className="text-zinc-300">Business Phone</Label>
-            <Input {...register("businessPhone")} className="border-zinc-700 bg-zinc-800 text-white" />
+            <Label className="text-[#57675c]">Business phone</Label>
+            <Input {...register("businessPhone")} className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]" />
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <Label className="text-zinc-300">Business Address</Label>
-            <Input {...register("businessAddress")} className="border-zinc-700 bg-zinc-800 text-white" />
+            <Label className="text-[#57675c]">Business address</Label>
+            <Input {...register("businessAddress")} className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]" />
           </div>
           <div className="space-y-2">
-            <Label className="text-zinc-300">Default Currency</Label>
+            <Label className="text-[#57675c]">Default currency</Label>
             <Select value={currentCurrency} onValueChange={(val) => setValue("defaultCurrency", val as "NGN" | "USD" | "GBP")}>
-              <SelectTrigger className="border-zinc-700 bg-zinc-800 text-white">
+              <SelectTrigger className="border-[#dfe5dc] bg-white text-[#263d33]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="border-zinc-700 bg-zinc-900">
-                <SelectItem value="NGN" className="text-zinc-300 focus:bg-zinc-800">NGN - Naira</SelectItem>
-                <SelectItem value="USD" className="text-zinc-300 focus:bg-zinc-800">USD - Dollar</SelectItem>
-                <SelectItem value="GBP" className="text-zinc-300 focus:bg-zinc-800">GBP - Pound</SelectItem>
+              <SelectContent className="border-[#dfe5dc] bg-[#fffefa] text-[#263d33]">
+                <SelectItem value="NGN" className="text-[#42584d] focus:bg-[#edf1ea]">NGN - Naira</SelectItem>
+                <SelectItem value="USD" className="text-[#42584d] focus:bg-[#edf1ea]">USD - Dollar</SelectItem>
+                <SelectItem value="GBP" className="text-[#42584d] focus:bg-[#edf1ea]">GBP - Pound</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -96,29 +105,40 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
       </Card>
 
       {/* Bank Details */}
-      <Card className="border-zinc-800 bg-zinc-900/60">
+      <Card className="border-[#e1e7de] bg-[#fffefa] shadow-[0_1px_2px_rgba(27,47,41,0.03)]">
         <CardHeader>
-          <CardTitle className="text-white">Bank Details</CardTitle>
+          <div className="flex items-start gap-3">
+            <span className="flex size-9 items-center justify-center rounded-lg bg-[#e8f4ec] text-[#176c53]">
+              <Landmark className="size-[18px]" />
+            </span>
+            <div>
+              <CardTitle className="text-base font-semibold text-[#233a30]">Bank details</CardTitle>
+              <p className="mt-1 text-xs text-[#89948c]">Optional payment information for your invoices.</p>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label className="text-zinc-300">Bank Name</Label>
-            <Input {...register("bankName")} className="border-zinc-700 bg-zinc-800 text-white" />
+            <Label className="text-[#57675c]">Bank name</Label>
+            <Input {...register("bankName")} className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]" />
           </div>
           <div className="space-y-2">
-            <Label className="text-zinc-300">Account Name</Label>
-            <Input {...register("accountName")} className="border-zinc-700 bg-zinc-800 text-white" />
+            <Label className="text-[#57675c]">Account name</Label>
+            <Input {...register("accountName")} className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]" />
           </div>
           <div className="space-y-2">
-            <Label className="text-zinc-300">Account Number</Label>
-            <Input {...register("accountNumber")} className="border-zinc-700 bg-zinc-800 text-white" />
+            <Label className="text-[#57675c]">Account number</Label>
+            <Input {...register("accountNumber")} className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]" />
           </div>
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col-reverse gap-3 border-t border-[#e1e7de] pt-4 sm:flex-row sm:items-center sm:justify-between">
         {successMessage && (
-          <p className="text-sm font-medium text-green-400">{successMessage}</p>
+          <p role="status" className="inline-flex items-center gap-2 text-sm font-medium text-[#176c53]">
+            <CheckCircle2 className="size-4" />
+            {successMessage}
+          </p>
         )}
         <div className="flex justify-end ml-auto">
           <Button type="submit" disabled={isSubmitting}>

@@ -1,8 +1,8 @@
 "use server"
 
-import { auth } from "@clerk/nextjs/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
+import { getOrCreateCurrentUser } from "@/lib/user-sync"
 import { clientSchema } from "@/lib/validations/client"
 
 // ─────────────────────────────────────────────────────
@@ -10,21 +10,7 @@ import { clientSchema } from "@/lib/validations/client"
 // We'll reuse this in every action
 // ─────────────────────────────────────────────────────
 async function getCurrentUser() {
-  const { userId } = await auth()
-
-  if (!userId) {
-    throw new Error("Unauthorized")
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  })
-
-  if (!user) {
-    throw new Error("User not found in database")
-  }
-
-  return user
+  return getOrCreateCurrentUser()
 }
 
 // ─────────────────────────────────────────────────────

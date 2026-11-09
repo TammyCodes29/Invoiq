@@ -1,8 +1,8 @@
 "use server"
 
-import { auth } from "@clerk/nextjs/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
+import { getOrCreateCurrentUser } from "@/lib/user-sync"
 import { z } from "zod"
 
 const settingsSchema = z.object({
@@ -16,11 +16,7 @@ const settingsSchema = z.object({
 })
 
 export async function updateSettings(formData: unknown) {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
-  if (!user) throw new Error("User not found")
+  const user = await getOrCreateCurrentUser()
 
   const result = settingsSchema.safeParse(formData)
 
@@ -38,11 +34,7 @@ export async function updateSettings(formData: unknown) {
 }
 
 export async function getSettings() {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
-  if (!user) return null
+  const user = await getOrCreateCurrentUser()
 
   return {
     businessName: user.businessName || "",

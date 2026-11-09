@@ -1,16 +1,12 @@
 "use server"
 
-import { auth } from "@clerk/nextjs/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
+import { getOrCreateCurrentUser } from "@/lib/user-sync"
 import { z } from "zod"
 
 async function getCurrentUser() {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
-  if (!user) throw new Error("User not found")
-  return user
+  return getOrCreateCurrentUser()
 }
 
 const lineItemSchema = z.object({
@@ -96,6 +92,10 @@ export async function getInvoices() {
           email: true,
           company: true,
         },
+      },
+      lineItems: {
+        select: { description: true },
+        take: 1,
       },
     },
   })
@@ -183,36 +183,72 @@ export async function getDashboardStats() {
         client: {
           select: { name: true },
         },
+        lineItems: {
+          select: { description: true },
+          take: 1,
+        },
       },
       orderBy: { createdAt: "desc" },
     }),
   ])
 
-  // Group revenue by currency (only PAID invoices)
-  const revenueMap: Record<string, number> = {}
-  invoices
-    .filter((inv) => inv.status === "PAID")
-    .forEach((inv) => {
-      const currency = inv.currency
-      revenueMap[currency] = (revenueMap[currency] ?? 0) + Number(inv.total)
-    })
+  const paidInvoices = invoices.filter((invoice) => invoice.status === "PAID")
+  const outstandingInvoices = invoices.filter(
+    (invoice) => invoice.status === "SENT" || invoice.status === "OVERDUE"
+  )
 
-  // Group outstanding by currency (SENT + OVERDUE invoices)
+  const revenueMap: Record<string, number> = {}
+  paidInvoices.forEach((invoice) => {
+    revenueMap[invoice.currency] =
+      (revenueMap[invoice.currency] ?? 0) + Number(invoice.total)
+  })
+
   const outstandingMap: Record<string, number> = {}
-  invoices
-    .filter((inv) => inv.status === "SENT" || inv.status === "OVERDUE")
-    .forEach((inv) => {
-      const currency = inv.currency
-      outstandingMap[currency] =
-        (outstandingMap[currency] ?? 0) + Number(inv.total)
+  outstandingInvoices.forEach((invoice) => {
+    outstandingMap[invoice.currency] =
+      (outstandingMap[invoice.currency] ?? 0) + Number(invoice.total)
+  })
+
+  const currentWeekStart = new Date()
+  currentWeekStart.setHours(0, 0, 0, 0)
+  currentWeekStart.setDate(
+    currentWeekStart.getDate() - ((currentWeekStart.getDay() + 6) % 7)
+  )
+
+  const invoiceActivity = Array.from({ length: 6 }, (_, index) => {
+    const start = new Date(currentWeekStart)
+    start.setDate(start.getDate() - (5 - index) * 7)
+    const end = new Date(start)
+    end.setDate(end.getDate() + 7)
+
+    return {
+      label: start.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      count: invoices.filter(
+        (invoice) => invoice.createdAt >= start && invoice.createdAt < end
+      ).length,
+    }
+  })
+
+  const followUpInvoices = outstandingInvoices
+    .sort((first, second) => {
+      if (first.status !== second.status) {
+        return first.status === "OVERDUE" ? -1 : 1
+      }
+      return first.dueDate.getTime() - second.dueDate.getTime()
     })
+    .slice(0, 4)
 
   const recentInvoices = invoices.slice(0, 5)
 
   return {
     totalClients,
+    totalInvoices: invoices.length,
+    paidInvoiceCount: paidInvoices.length,
+    outstandingInvoiceCount: outstandingInvoices.length,
     revenueMap,
     outstandingMap,
     recentInvoices,
+    followUpInvoices,
+    invoiceActivity,
   }
 }

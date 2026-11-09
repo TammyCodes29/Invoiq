@@ -1,16 +1,17 @@
 import { getClients } from "@/actions/clients"
-import { auth } from "@clerk/nextjs/server"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
 import { generateInvoiceNumber } from "@/actions/invoices"
 import { InvoiceBuilder } from "@/components/dashboard/invoices/InvoiceBuilder"
+import { getOrCreateCurrentUser } from "@/lib/user-sync"
 
-export default async function NewInvoicePage() {
-  const { userId } = await auth()
-  if (!userId) redirect("/sign-in")
+type NewInvoicePageProps = {
+  searchParams: Promise<{ clientId?: string }>
+}
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
-  if (!user) redirect("/sign-in")
+export default async function NewInvoicePage({
+  searchParams,
+}: NewInvoicePageProps) {
+  const { clientId } = await searchParams
+  const user = await getOrCreateCurrentUser()
 
   const clients = await getClients()
   const invoiceNumber = await generateInvoiceNumber(user.id)
@@ -18,10 +19,11 @@ export default async function NewInvoicePage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-white">
+        <p className="mb-2 text-[11px] font-semibold uppercase text-[#738278]">Billing</p>
+        <h1 className="font-serif text-[34px] font-normal leading-tight text-[#1b3029]">
           New Invoice
         </h1>
-        <p className="mt-1 text-sm text-zinc-400">
+        <p className="mt-2 text-sm text-[#718078]">
           Fill in the details below to create your invoice.
         </p>
       </div>
@@ -29,6 +31,7 @@ export default async function NewInvoicePage() {
       <InvoiceBuilder
         clients={clients}
         defaultInvoiceNumber={invoiceNumber}
+        defaultClientId={clientId}
       />
     </div>
   )

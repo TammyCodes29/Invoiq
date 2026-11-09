@@ -7,16 +7,19 @@ export default async function ClientsPage() {
 
   return (
     <div>
-      <header className="mb-8 flex items-center justify-between">
+      <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">
+          <p className="mb-2 text-[11px] font-semibold uppercase text-[#738278]">Relationships</p>
+          <h1 className="font-serif text-[34px] font-normal leading-tight text-[#1b3029]">
             Clients
           </h1>
-          <p className="mt-1 text-sm text-zinc-400">
+          <p className="mt-2 text-sm text-[#718078]">
             {clients.length} {clients.length === 1 ? "client" : "clients"}
           </p>
         </div>
-        <AddClientDialog />
+        <div className="self-start sm:self-auto">
+          <AddClientDialog />
+        </div>
       </header>
       <ClientsTable clients={clients}/>
     </div>

@@ -61,7 +61,7 @@ export function AddClientDialog() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="border-zinc-800 bg-zinc-900 text-white sm:max-w-md">
+      <DialogContent className="top-auto bottom-2 max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] translate-y-0 overflow-y-auto rounded-xl border-[#dfe5dc] bg-[#fffefa] p-5 text-[#263d33] shadow-xl data-[state=open]:slide-in-from-top-0 data-[state=closed]:slide-out-to-top-0 sm:bottom-auto sm:top-[50%] sm:w-full sm:max-w-md sm:translate-y-[-50%] sm:p-6 sm:data-[state=open]:slide-in-from-top-[48%] sm:data-[state=closed]:slide-out-to-top-[48%]">
         <DialogHeader>
           <DialogTitle>Add New Client</DialogTitle>
         </DialogHeader>
@@ -74,11 +74,11 @@ export function AddClientDialog() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-300">Full Name *</FormLabel>
+                  <FormLabel className="text-[#57675c]">Full Name *</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Emeka Okafor"
-                      className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
+                      className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]"
                       {...field}
                     />
                   </FormControl>
@@ -92,12 +92,12 @@ export function AddClientDialog() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-300">Email Address *</FormLabel>
+                  <FormLabel className="text-[#57675c]">Email Address *</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="emeka@company.com"
-                      className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
+                      className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]"
                       {...field}
                     />
                   </FormControl>
@@ -111,11 +111,11 @@ export function AddClientDialog() {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-300">Phone</FormLabel>
+                  <FormLabel className="text-[#57675c]">Phone</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="+234 801 234 5678"
-                      className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
+                      className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]"
                       {...field}
                     />
                   </FormControl>
@@ -129,11 +129,11 @@ export function AddClientDialog() {
               name="company"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-300">Company</FormLabel>
+                  <FormLabel className="text-[#57675c]">Company</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Acme Ltd"
-                      className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
+                      className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]"
                       {...field}
                     />
                   </FormControl>
@@ -147,11 +147,11 @@ export function AddClientDialog() {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-300">Address</FormLabel>
+                  <FormLabel className="text-[#57675c]">Address</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Lagos, Nigeria"
-                      className="border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
+                      className="border-[#dfe5dc] bg-white text-[#263d33] placeholder:text-[#9aa49c]"
                       {...field}
                     />
                   </FormControl>
@@ -164,7 +164,7 @@ export function AddClientDialog() {
               <Button
                 type="button"
                 variant="ghost"
-                className="text-zinc-400 hover:text-white"
+                className="text-[#718078] hover:bg-[#edf1ea] hover:text-[#1b483d]"
                 onClick={() => setOpen(false)}
               >
                 Cancel

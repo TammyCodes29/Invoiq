@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { MoreHorizontal, Pencil, Trash2, Users } from "lucide-react"
 import { deleteClient } from "@/actions/clients"
 import { EditClientDialog } from "./EditClientDialog"
 import Link from "next/link"
@@ -55,25 +55,90 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 
   if (clients.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-700 py-20 text-center">
-        <p className="text-lg font-medium text-white">No clients yet</p>
-        <p className="mt-1 text-sm text-zinc-400">
+      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[#d7e1d7] bg-[#fffefa] py-16 text-center">
+        <span className="flex size-11 items-center justify-center rounded-lg bg-[#edf2fa] text-[#3863a0]">
+          <Users className="size-5" />
+        </span>
+        <p className="mt-3 text-sm font-semibold text-[#263d33]">No clients yet</p>
+        <p className="mt-1 text-sm text-[#89948c]">
           Add your first client using the button above
         </p>
       </div>
     )
   }
 
+  function renderActions(client: Client) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={`Actions for ${client.name}`}
+            className="shrink-0 text-[#738278] hover:bg-[#edf1ea] hover:text-[#1b483d]"
+          >
+            <MoreHorizontal className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end" className="border-[#dfe5dc] bg-[#fffefa] text-[#33483d]">
+          <DropdownMenuItem
+            className="cursor-pointer text-[#42584d] focus:bg-[#edf1ea] focus:text-[#1b483d]"
+            onClick={() => setEditingClient(client)}
+          >
+            <Pencil className="mr-2 size-4" />
+            Edit
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="cursor-pointer text-[#a64f3b] focus:bg-[#fbefea] focus:text-[#a64f3b]"
+            onClick={() => handleDelete(client.id)}
+            disabled={deletingId === client.id}
+          >
+            <Trash2 className="mr-2 size-4" />
+            {deletingId === client.id ? "Deleting..." : "Delete"}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+  }
+
   return (
     <>
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/60">
+      <div className="overflow-hidden rounded-lg border border-[#e1e7de] bg-[#fffefa] shadow-[0_1px_2px_rgba(27,47,41,0.03)]">
+        <ul className="divide-y divide-[#edf0eb] lg:hidden">
+          {clients.map((client) => (
+            <li key={client.id} className="flex items-start gap-3 p-4 transition-colors hover:bg-[#f8faf6]">
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="flex min-w-0 items-center gap-2">
+                  <Link
+                    href={`/dashboard/clients/${client.id}`}
+                    className="truncate text-sm font-semibold text-[#263d33] transition-colors hover:text-[#176c53]"
+                  >
+                    {client.name}
+                  </Link>
+                  <Badge variant="secondary" className="shrink-0 border-0 bg-[#f0f1ed] text-[10px] text-[#6e7971]">
+                    {client._count.invoices} {client._count.invoices === 1 ? "invoice" : "invoices"}
+                  </Badge>
+                </div>
+                <p className="break-all text-sm text-[#718078]">{client.email}</p>
+                {client.company && (
+                  <p className="truncate text-xs text-[#89948c]">{client.company}</p>
+                )}
+              </div>
+              {renderActions(client)}
+            </li>
+          ))}
+        </ul>
+
+        <div className="hidden lg:block">
         <Table>
-          <TableHeader>
-            <TableRow className="border-zinc-800 hover:bg-transparent">
-              <TableHead className="text-zinc-400">Name</TableHead>
-              <TableHead className="text-zinc-400">Email</TableHead>
-              <TableHead className="text-zinc-400">Company</TableHead>
-              <TableHead className="text-zinc-400">Invoices</TableHead>
+          <TableHeader className="bg-[#f8f9f5]">
+            <TableRow className="border-[#e9ede7] hover:bg-transparent">
+              <TableHead className="text-[11px] font-semibold uppercase text-[#758279]">Name</TableHead>
+              <TableHead className="text-[11px] font-semibold uppercase text-[#758279]">Email</TableHead>
+              <TableHead className="text-[11px] font-semibold uppercase text-[#758279]">Company</TableHead>
+              <TableHead className="text-[11px] font-semibold uppercase text-[#758279]">Invoices</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -82,29 +147,29 @@ export function ClientsTable({ clients }: ClientsTableProps) {
             {clients.map((client) => (
               <TableRow
                 key={client.id}
-                className="border-zinc-800 hover:bg-zinc-800/50"
+                className="border-[#edf0eb] hover:bg-[#f8faf6]"
               >
-                <TableCell className="font-medium text-white">
+                <TableCell className="font-medium text-[#263d33]">
                   <Link
                     href={`/dashboard/clients/${client.id}`}
-                    className="hover:text-blue-400 hover:underline transition-colors"
+                    className="transition-colors hover:text-[#176c53] hover:underline"
                   >
                     {client.name}
                   </Link>
                 </TableCell>
 
-                <TableCell className="text-zinc-400">
+                <TableCell className="break-all text-[#718078]">
                   {client.email}
                 </TableCell>
 
-                <TableCell className="text-zinc-400">
+                <TableCell className="text-[#718078]">
                   {client.company ?? "—"}
                 </TableCell>
 
                 <TableCell>
                   <Badge
                     variant="secondary"
-                    className="bg-zinc-800 text-zinc-300"
+                    className="border-0 bg-[#f0f1ed] text-[#6e7971]"
                   >
                     {client._count.invoices}{" "}
                     {client._count.invoices === 1 ? "invoice" : "invoices"}
@@ -112,44 +177,13 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                 </TableCell>
 
                 <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-zinc-400 hover:text-white"
-                      >
-                        <MoreHorizontal className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent
-                      align="end"
-                      className="border-zinc-700 bg-zinc-900"
-                    >
-                      <DropdownMenuItem
-                        className="cursor-pointer text-zinc-300 focus:bg-zinc-800 focus:text-white"
-                        onClick={() => setEditingClient(client)}
-                      >
-                        <Pencil className="mr-2 size-4" />
-                        Edit
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem
-                        className="cursor-pointer text-red-400 focus:bg-zinc-800 focus:text-red-400"
-                        onClick={() => handleDelete(client.id)}
-                        disabled={deletingId === client.id}
-                      >
-                        <Trash2 className="mr-2 size-4" />
-                        {deletingId === client.id ? "Deleting..." : "Delete"}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {renderActions(client)}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {editingClient && (

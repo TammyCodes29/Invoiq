@@ -84,7 +84,7 @@ export function InvoiceActions({
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="gap-2 border-zinc-700 text-zinc-300 hover:text-white"
+              className="gap-2 border-[#d6dfd6] bg-white text-[#42584d] hover:bg-[#edf1ea] hover:text-[#1b483d]"
               disabled={isLoading}
             >
               Update Status
@@ -94,12 +94,12 @@ export function InvoiceActions({
 
           <DropdownMenuContent
             align="end"
-            className="border-zinc-700 bg-zinc-900"
+            className="border-[#dfe5dc] bg-[#fffefa] text-[#263d33]"
           >
             {availableTransitions.map((status) => (
               <DropdownMenuItem
                 key={status}
-                className="cursor-pointer text-zinc-300 focus:bg-zinc-800 focus:text-white"
+                className="cursor-pointer text-[#42584d] focus:bg-[#edf1ea] focus:text-[#1b483d]"
                 onClick={() =>
                   handleStatusChange(
                     status as "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "CANCELLED"
@@ -116,9 +116,10 @@ export function InvoiceActions({
        <Button
         variant="outline"
         size="icon"
-        className="text-zinc-400 hover:text-blue-400 border-zinc-700"
+        className="border-[#d6dfd6] text-[#718078] hover:bg-[#edf2fa] hover:text-[#3863a0]"
         disabled={isLoading}
         onClick={handleSendReminder}
+          aria-label="Send payment reminder"
         title="Send Payment Reminder"
       >
         <Mail className="size-4" />
@@ -127,9 +128,10 @@ export function InvoiceActions({
       <Button
         variant="ghost"
         size="icon"
-        className="text-zinc-500 hover:text-red-400"
+        className="text-[#89948c] hover:bg-[#fbefea] hover:text-[#aa503d]"
         disabled={isLoading}
         onClick={handleDelete}
+        aria-label="Delete invoice"
       >
         <Trash2 className="size-4" />
       </Button>

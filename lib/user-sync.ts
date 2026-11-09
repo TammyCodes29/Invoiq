@@ -1,4 +1,5 @@
 import { prisma } from "./prisma"
+import { auth, currentUser } from "@clerk/nextjs/server"
 
 export async function syncUserToDatabase(
   clerkId: string,
@@ -46,6 +47,40 @@ export async function syncUserToDatabase(
 
   } catch (error) {
     console.error("syncUserToDatabase failed:", error)
+    throw error
+  }
+}
+
+export async function getOrCreateCurrentUser() {
+  const { userId } = await auth()
+  if (!userId) throw new Error("Unauthorized")
+
+  const existingUser = await prisma.user.findUnique({
+    where: { clerkId: userId },
+  })
+  if (existingUser) return existingUser
+
+  const clerkUser = await currentUser()
+  if (!clerkUser) throw new Error("Authenticated user not found")
+
+  const email =
+    clerkUser.emailAddresses.find(
+      (address) => address.id === clerkUser.primaryEmailAddressId
+    )?.emailAddress ?? clerkUser.emailAddresses[0]?.emailAddress
+
+  if (!email) throw new Error("Authenticated user has no email address")
+
+  const fullName = [clerkUser.firstName, clerkUser.lastName]
+    .filter(Boolean)
+    .join(" ")
+
+  try {
+    return await syncUserToDatabase(userId, email, fullName || undefined)
+  } catch (error) {
+    const syncedUser = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    })
+    if (syncedUser) return syncedUser
     throw error
   }
 }
