@@ -25,7 +25,8 @@ Hate writing professional descriptions for your invoices? Just type what you did
 ### 3. Get Paid Instantly
 Don't just send an invoice; send a payment link. Invoiq integrates with Flutterwave, allowing your clients to pay via Card, USSD, or Mobile Money directly from the invoice.
 
-![Flutterwave Payment Modal](./public/screenshots/payment.png)(./public/screenshots/payment2.png)
+![Flutterwave Payment Modal](./public/screenshots/payment.png)
+![Payment Screen](./public/screenshots/payment2.png)
  
 
 ### 4. Automated Follow-ups
